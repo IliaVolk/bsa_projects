@@ -6,10 +6,7 @@ var Project = new Schema({
     name:  {type: String, required: true},
     description: String,
     timeBegin:   {type: Date, default: Date.now},//always default
-    timeEnd: {
-        type: Date,
-        required: true
-    },
+    timeEnd: Date,
     attachment: {
         type: String, //or Number
         data: Buffer //binary type
