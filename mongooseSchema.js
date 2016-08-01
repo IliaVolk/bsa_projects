@@ -3,10 +3,13 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var projectSchema = new Schema({
-    name:  String,
+    name:  {type: String, required: true},
     description: String,
     timeBegin:   {type: Date, default: Date.now},//always default
-    timeEnd: Date,
+    timeEnd: {
+        type: Date,
+        required: true
+    },
     attachment: {
         type: String, //or Number
         data: Buffer //binary type
@@ -14,26 +17,29 @@ var projectSchema = new Schema({
     },
     stage: String, // or Number
     tags: [String],
-    technologies: [
-        {
+    technologies: {
+        value: [{
             name: String,
             id: ObjectId // reference to image, other
         }
+        ],
+        required: true}
+    ,
+    users: {
+        value: [{
+                name: String,//urgent(срочынй) info
+                rights: [String],
+                id: ObjectId //reference to other information
+            }
     ],
-    users: [
-        {
-            name: String,//urgent(срочынй) info
-            id: ObjectId //reference to other information
-        }
-    ],
+        required: true},
     estimate:{//оценка
         value: Number,//средняя оценка
         count: Number,//число оценок
         //urgent info
         estimates:[/*can contain more info*/]
     },
-    features: [
-        {
+    features: [{
             name: String,
             description: String,//other data
             //will contain references to data in attachment
@@ -52,8 +58,7 @@ var requestedProjectSchema = new Schema({
     name: String,
     description: String,
     tags:[String],
-    technologies:[
-        {
+    technologies:[{
             name: String,
             image: Buffer
         }
@@ -65,14 +70,13 @@ var userSchema = new Schema({
     hash: Number,//or String
     salt: Number,//password information
     image: Buffer,
-    projects: [
-        {
+    projects: [{
             name: String,//urgent info
+            rights: [String],
             id: ObjectId//reference to project
         }
     ],
-    technologies:[
-        {
+    technologies:[{
             name: String,//urgent info
             id: ObjectId//reference
         }
