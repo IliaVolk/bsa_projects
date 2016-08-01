@@ -1,89 +1,206 @@
-
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var Project = new Schema({
-    name:  {type: String, required: true},
-    description: String,
-    timeBegin:   {type: Date, default: Date.now},//always default
-    timeEnd: Date,
-    attachment: {
-        type: String, //or Number
-        data: Buffer //binary type
-        //can be stored on special services
+var ProjectEntity = new Schema({
+    users: {//owners
+        users:[{							// Related to ‘UsersCollection’
+            userNameLink: Schema.UsersCollection._id
+        }],
+        required: true//front end?
     },
-    stage: String, // or Number
-    tags: [String],
+    owners: {//owners
+        users:[{							// Related to ‘UsersCollection’
+            userNameLink: Schema.UsersCollection._id
+        }],
+        required: true//front end?
+    },
+
+    technologies: [{					// Related to ‘TechnologiesCollection’
+        techNameLink: Schema.TechnologiesCollection._id,
+        required: true
+    }],
+
+    projectName: {type: String, required: true},			// Unique
+
+    description: [{
+        date: {type: Date, default: Date.now},
+        text: String
+    }],
+
+    screenShots: [{
+        internal: Boolean,							//Internal: true, External: false
+        linkToSource: String,						// if ‘internal’ == false
+        shot: Buffer
+    }],
+
+    timeBegin:{
+        type: Date,
+        default: Date.now,
+        required: true
+    },
+    timeEnd:{
+        type: Date,
+        required: true
+    },
+
+    tags: [{											// Related to ‘TagsCollection’
+        tagNameLink: Schema.TagsCollection._id,		// if ‘fromCollection’ is ‘true’
+        tagName: String
+    }],
+
+    stage: {											// Related to ‘StagesCollection’
+        stageNameLink: Schema.StagesCollection._id
+    },
+
+    sections: [{
+        name: String,
+        description: String,
+        features:[{
+            name: String,
+            description: String,
+            estimation: {
+                amount: Number,
+                description: String//optional
+            },
+            subFeatures: [{
+                name: String,
+                description: String,
+                estimation: {
+                    amount: Number,
+                    description: String//optional
+                }
+            }]
+        }]
+    }],
+    questions:[{
+        question:{
+            author: {
+                name: String,
+                id: ObjectId
+            },
+            text: String
+        },
+        answer: [{text: String}],
+        isPrivate: Boolean
+    }]
+    /*estimation: [{
+        value: Number,
+        date: {type: Date, default: Date.now},
+        description: String
+    }]*/
+});
+
+var RequestedProjectEntity = new Schema({
+    owners: {//optional?
+        users:[{							// Related to ‘UsersCollection’
+            userNameLink: Schema.UsersCollection._id
+        }],
+        required: true//front end?
+    },
+    projectName: {type: String, required: true},
+
+    descriptions: [{
+        date: {type: Date, default: Date.now},
+        descrText: String
+    }],
+
+    tags: [{							// Related to ‘TagsCollection’
+        tagNameLink: Schema.Tag._id,		// if ‘fromCollection’ is ‘true’
+        tagName: String
+    }],
+
     technologies: {
-        value: [{
-            name: String,
-            id: ObjectId // reference to image, other
-        }
-        ],
-        required: true}
-    ,
-    users: {
-        value: [{
-                name: String,//urgent(срочынй) info
-                rights: [String],
-                id: ObjectId //reference to other information
-            }
-    ],
-        required: true},
-    estimate:{//оценка
-        value: Number,//средняя оценка
-        count: Number,//число оценок
-        //urgent info
-        estimates:[/*can contain more info*/]
+        techNameLinks: [Schema.TechnologiesCollection._id],
+        required: true
     },
-    features: [{
+
+    condition: {						// Related to ‘ConditionCollection’
+        name: String,//InProgress, Estimated
+        //conditionNameLink: Number,
+        required: true
+    },
+
+    screenShots: [{
+        internal: Boolean,			//Internal: true, External: false
+        linkToSource: String,		// if ‘internal’ == false
+        shot: Buffer
+    }],
+
+    sections: [{
+        name: String,
+        description: String,
+        features:[{
             name: String,
-            description: String,//other data
-            //will contain references to data in attachment
-            //if possible, can be in special binary format
-            attachment: [{
-                id: Number,
-                type: String,//or Number
-                data: Buffer
-            }],
-            subFeatures:[/*Feature*/]//not required
-        }
-    ]
+            description: String,
+            estimation: {
+                amount: Number,
+                description: String//optional
+            },
+            subFeatures: [{
+                name: String,
+                description: String,
+                estimation: {
+                    amount: Number,
+                    description: String//optional
+                }
+            }]
+        }]
+    }],
+
+    questions:[{
+        question:{
+            author: {
+                name: String,
+                id: ObjectId
+            },
+            text: String
+        },
+        answer: [{text: String}],
+        isPrivate: Boolean
+    }]
 });
-var RequestedProject = new Schema({
-    _id: ObjectId,
-    name: String,
-    description: String,
-    tags:[String],
-    technologies:[{
-            name: String,
-            image: Buffer
-        }
-    ]
-});
+
+
 var User = new Schema({
     _id: ObjectId,
-    name: String,
-    hash: Number,//or String
-    salt: Number,//password information
-    image: Buffer,
-    projects: [{
-            name: String,//urgent info
-            rights: [String],
-            id: ObjectId//reference to project
-        }
-    ],
-    technologies:[{
-            name: String,//urgent info
-            id: ObjectId//reference
-        }
-    ],
+    login: String,
+    userName: String,
+    userSurname: String,
+    avatar: Buffer,
+    authHash: String,
     rights: [String]
 });
 
+
 var Technology = new Schema({
     _id: ObjectId,
-    name: String,
-    color: String,
-    image: Buffer
+    techName: String,
+    techAvatar: Buffer
 });
+
+
+var Tag = new Schema({
+    _id: ObjectId,
+    tagName: String,
+    tagLinks: [Schema.TagsCollection._id]
+});
+
+
+var Stage = new Schema({
+    _id: ObjectId,
+    stageName: String,
+    comissioned: {type: Date, required: true},//дополнительная фича которая позволяет пользователю
+    //использовать актуальные на текущий момент stages
+    decomissioned: Date
+});
+
+
+var Condition = new Schema({
+    // ‘In Progress’ / ‘Estimated’ / ‘Discussed’
+    _id: ObjectId,
+    conditionName: String,
+    comissioned: {type: Date, required: true, default: Date.now},
+    decomissioned: Date
+})
+
+
