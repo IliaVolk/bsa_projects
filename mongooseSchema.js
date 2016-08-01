@@ -2,7 +2,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var projectSchema = new Schema({
+var Project = new Schema({
     name:  {type: String, required: true},
     description: String,
     timeBegin:   {type: Date, default: Date.now},//always default
@@ -53,7 +53,7 @@ var projectSchema = new Schema({
         }
     ]
 });
-var requestedProjectSchema = new Schema({
+var RequestedProject = new Schema({
     _id: ObjectId,
     name: String,
     description: String,
@@ -64,7 +64,7 @@ var requestedProjectSchema = new Schema({
         }
     ]
 });
-var userSchema = new Schema({
+var User = new Schema({
     _id: ObjectId,
     name: String,
     hash: Number,//or String
@@ -84,9 +84,9 @@ var userSchema = new Schema({
     rights: [String]
 });
 
-var technologySchema = new Schema({
+var Technology = new Schema({
     _id: ObjectId,
     name: String,
-    color: Color,
+    color: String,
     image: Buffer
 });
